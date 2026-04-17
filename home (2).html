@@ -1,0 +1,172 @@
+<html>
+<head>
+<title>
+Talker
+</title>
+<style>
+header {
+  background-color: #ff0066;
+  padding: 7px;
+  text-align: center;
+  font-size: 35px;
+  color: black;
+}
+
+body{
+h1 {
+  font-family: "Lucida Console", "Courier New", monospace;
+}
+a:link {
+  color: black;
+  background-color: transparent;
+  text-decoration: none;
+    font-family: "Lucida Console", "Courier New", monospace;
+
+}
+
+a:visited {
+  color: black;
+  background-color: transparent;
+  text-decoration: none;
+    font-family: "Lucida Console", "Courier New", monospace;
+
+}
+
+a:hover {
+  color: white;
+  background-color: transparent;
+  text-decoration: none;
+    font-family: "Lucida Console", "Courier New", monospace;
+
+}
+
+a:active {
+  color: white;
+  background-color: transparent;
+  text-decoration: underline;
+    font-family: "Lucida Console", "Courier New", monospace;
+
+}
+}
+
+
+
+nav {
+  float: left;
+  width: 25%;
+  min-height: 300px;
+  background: #ff0066;
+  padding: 20px;
+}
+
+nav ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+article {
+  float: left;
+  padding: 20px;
+  width: 70%;
+  background-color: #f1f1f1;
+  height: 300px;
+}
+
+section::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+footer {
+  background-color: #ff0066;
+  padding: 10px;
+  text-align: center;
+  color: white;
+      font-family: "Lucida Console", "Courier New", monospace;
+
+}
+
+@media (max-width: 600px) {
+  nav, article {
+    width: 100%;
+    height: auto;
+  }
+}
+</style>
+</head>
+<body style="cursor:pointer">
+<header>
+<h1>Talker</h1>
+</header>
+
+<section>
+<nav>
+<h5>A small simple message board website
+</h5>
+
+</nav>
+
+<article>  <form id="messageForm">
+    <input type="text" id="messageInput" placeholder="Enter a message" required />
+    <button type="submit">Send</button>
+  </form>
+
+  <h2>Messages:</h2>
+  <ul ><li id="messagesList"></li></ul>
+</article>
+</section>
+
+<footer><marquee>Have a nice day • Have a nice day • Have a nice day • Have a nice day • Have a nice day • Have a nice day • Have a nice day </marquee></footer>
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = "https://lkgjwwokdjqbjlxjhoze.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxrZ2p3d29rZGpxYmpseGpob3plIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MjUyODQsImV4cCI6MjA5MjAwMTI4NH0.tCTXXkAkTMXK_mFX1ZJlFwqfweLr0ISj2r2ecbWhpnA";
+
+  const { createClient } = supabase;
+  const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const form = document.getElementById("messageForm");
+  const input = document.getElementById("messageInput");
+  const list = document.getElementById("messagesList");
+
+  async function loadMessages() {
+    const { data, error } = await db
+      .from("messages")
+      .select("*")
+      .order("created_at", { ascending: false });
+  }
+
+    if (error) {
+      console.error("load error:", error);
+      return;
+    }
+
+data.forEach(msg => {
+  const li = document.createElement("li");
+  li.textContent = `${msg.id}: ${msg.content} (${new Date(msg.created_at).toLocaleString()})`;
+  list.appendChild(li);
+});
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const content = input.value.trim();
+    if (!content) return;
+
+    const { error } = await db
+      .from("messages")
+      .insert([{ content }]);
+
+    if (error) {
+      console.error("insert error:", error);
+    } else {
+      input.value = "";
+      loadMessages();
+    }
+  });
+
+  loadMessages();
+</script>
+
+</body>
+</html>
