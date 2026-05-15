@@ -1,173 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
-<html>
 <head>
-<title>
-Talker
-</title>
-<style>
-header {
-  background-color: #ff0066;
-  padding: 7px;
-  text-align: center;
-  font-size: 35px;
-  color: black;
-}
-
-body{
-h1 {
-  font-family: "Lucida Console", "Courier New", monospace;
-}
-a:link {
-  color: black;
-  background-color: transparent;
-  text-decoration: none;
-    font-family: "Lucida Console", "Courier New", monospace;
-
-}
-
-a:visited {
-  color: black;
-  background-color: transparent;
-  text-decoration: none;
-    font-family: "Lucida Console", "Courier New", monospace;
-
-}
-
-a:hover {
-  color: white;
-  background-color: transparent;
-  text-decoration: none;
-    font-family: "Lucida Console", "Courier New", monospace;
-
-}
-
-a:active {
-  color: white;
-  background-color: transparent;
-  text-decoration: underline;
-    font-family: "Lucida Console", "Courier New", monospace;
-
-}
-}
-
-
-
-nav {
-  float: left;
-  width: 25%;
-  min-height: 300px;
-  background: #ff0066;
-  padding: 20px;
-}
-
-nav ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-article {
-  float: left;
-  padding: 20px;
-  width: 70%;
-  background-color: #f1f1f1;
-  height: 300px;
-}
-
-section::after {
-  content: "";
-  display: table;
-  clear: both;
-}
-
-footer {
-  background-color: #ff0066;
-  padding: 10px;
-  text-align: center;
-  color: white;
-      font-family: "Lucida Console", "Courier New", monospace;
-
-}
-
-@media (max-width: 600px) {
-  nav, article {
-    width: 100%;
-    height: auto;
-  }
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Supabase Messaging Board</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #messages { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; }
+    .message { padding: 5px; border-bottom: 1px solid #eee; }
+    input, button { padding: 8px; margin-top: 5px; }
+  </style>
 </head>
-<body style="cursor:pointer">
-<header>
-<h1>Talker</h1>
-</header>
+<body>
+  <h1> Messaging Board</h1>
+  <div id="messages"></div>
+  <input type="text" id="username" placeholder="Your name" />
+  <input type="text" id="message" placeholder="Type a message" />
+  <button id="sendBtn">Send</button>
 
-<section>
-<nav>
-<h5>A small simple message board website
-</h5>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    //1Jswan??
+    const SUPABASE_URL = "https://lkgjwwokdjqbjlxjhoze.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxrZ2p3d29rZGpxYmpseGpob3plIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MjUyODQsImV4cCI6MjA5MjAwMTI4NH0.tCTXXkAkTMXK_mFX1ZJlFwqfweLr0ISj2r2ecbWhpnA";
 
-</nav>
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-<article>  <form id="messageForm">
-    <input type="text" id="messageInput" placeholder="Enter a message" required />
-    <button type="submit">Send</button>
-  </form>
+    const messagesDiv = document.getElementById("messages");
+    const usernameInput = document.getElementById("username");
+    const messageInput = document.getElementById("message");
+    const sendBtn = document.getElementById("sendBtn");
 
-  <h2>Messages:</h2>
-  <ul ><li id="messagesList"></li></ul>
-</article>
-</section>
-
-<footer><marquee>Have a nice day • Have a nice day • Have a nice day • Have a nice day • Have a nice day • Have a nice day • Have a nice day </marquee></footer>
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const SUPABASE_URL = "https://lkgjwwokdjqbjlxjhoze.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxrZ2p3d29rZGpxYmpseGpob3plIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MjUyODQsImV4cCI6MjA5MjAwMTI4NH0.tCTXXkAkTMXK_mFX1ZJlFwqfweLr0ISj2r2ecbWhpnA";
-
-  const { createClient } = supabase;
-  const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  const form = document.getElementById("messageForm");
-  const input = document.getElementById("messageInput");
-  const list = document.getElementById("messagesList");
-
-  async function loadMessages() {
-    const { data, error } = await db
-      .from("messages")
-      .select("*")
-      .order("created_at", { ascending: false });
-  }
-
-    if (error) {
-      console.error("load error:", error);
+    function addMessage(username, text) {
+      const div = document.createElement("div");
+      div.className = "message";
+      div.textContent = `${username}: ${text}`;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
-data.forEach(msg => {
-  const li = document.createElement("li");
-  li.textContent = `${msg.id}: ${msg.content} (${new Date(msg.created_at).toLocaleString()})`;
-  list.appendChild(li);
-});
+    async function loadMessages() {
+      try {
+        const { data, error } = await supabase
+          .from("messages")
+          .select("*")
+          .order("created_at", { ascending: true });
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const content = input.value.trim();
-    if (!content) return;
-
-    const { error } = await db
-      .from("messages")
-      .insert([{ content }]);
-
-    if (error) {
-      console.error("insert error:", error);
-    } else {
-      input.value = "";
-      loadMessages();
+        if (error) throw error;
+        messagesDiv.innerHTML = "";
+        data.forEach(msg => addMessage(msg.username, msg.text));
+      } catch (err) {
+        console.error("Error loading messages:", err.message);
+      }
     }
-  });
 
-  loadMessages();
-</script>
+    // Listen for new messages in real-time
+    function subscribeToMessages() {
+      supabase
+        .channel("public:messages")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "messages" },
+          payload => {
+            const msg = payload.new;
+            addMessage(msg.username, msg.text);
+          }
+        )
+        .subscribe();
+    }
 
+    // Send a new message
+    async function sendMessage() {
+      const username = usernameInput.value.trim();
+      const text = messageInput.value.trim();
+      if (!username || !text) return alert("Please enter both name and message.");
+
+      try {
+        const { error } = await supabase
+          .from("messages")
+          .insert([{ username, text }]);
+        if (error) throw error;
+        messageInput.value = "";
+      } catch (err) {
+        console.error("Error sending message:", err.message);
+      }
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    messageInput.addEventListener("keypress", e => {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    // Initialize
+    loadMessages();
+    subscribeToMessages();
+  </script>
 </body>
 </html>
+
